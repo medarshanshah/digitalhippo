@@ -11,7 +11,7 @@ import { buttonVariants } from "./ui/button";
 
 const Cart = () => {
 
-    const itemCount = 0;
+    const itemCount = 1;
 
     const fee = 1;
 
@@ -27,7 +27,7 @@ const Cart = () => {
         </SheetTrigger>
         <SheetContent className='flex w-full flex-col pr-0 sm:max-w-lg'>
             <SheetHeader className='space-y-2.5 pr-6'>
-                <SheetTitle>Cart (0)</SheetTitle>
+                <SheetTitle>Cart ({itemCount})</SheetTitle>
             </SheetHeader>
             {itemCount > 0 ? (
                 <>
