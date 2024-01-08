@@ -3,8 +3,7 @@ import { getPayloadClient } from './get-payload'
 import { nextApp, nextHandler } from './next-utils'
 import * as trpcExpress from '@trpc/server/adapters/express'
 import { appRouter } from './trpc';
-// import { appRouter } from './trpc'
-// import { inferAsyncReturnType } from '@trpc/server'
+import { inferAsyncReturnType } from '@trpc/server';
 // import bodyParser from 'body-parser'
 // import { IncomingMessage } from 'http'
 // import { stripeWebhookHandler } from './webhooks'
@@ -20,6 +19,9 @@ const createContext = ({req, res}: trpcExpress.CreateExpressContextOptions) => (
     req,
     res
 })
+
+// we will use this ExpressContext in trpc initialization
+export type ExpressContext = inferAsyncReturnType<typeof createContext>
 
 const start = async () => {
     const payload = await getPayloadClient({
