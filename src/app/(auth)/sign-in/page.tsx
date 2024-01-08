@@ -24,6 +24,14 @@ const Page = () => {
     const isSeller = searchParams.get('as') === 'seller'    // sign-in?as=seller
     const origin = searchParams.get('origin')       // useful when redirecting to hmepage or any other page
 
+    const continueAsSeller = () => {
+        router.push('?as=seller')
+    }
+
+    const continueAsBuyer = () => {
+        router.replace('/sign-in', undefined)
+    }
+
     const { 
         register, 
         handleSubmit, 
@@ -32,33 +40,36 @@ const Page = () => {
         resolver: zodResolver(AuthCredentialsValidator)
     })
 
-    const { mutate, isLoading } = trpc.auth.signIn.useMutation({
-        onError: (err) => {
-            if(err.data?.code === 'CONFLICT') {
-                toast.error(
-                    'This email is already in use. Sign in instead?'
-                )
+    const { mutate: signIn, isLoading } = 
+    trpc.auth.signIn.useMutation({
+              
+        onSuccess: () => {
+            toast.success('Signed in successfully')
 
+            router.refresh()
+
+            if(origin) {
+                router.push(`${origin}`)
                 return
             }
 
-            if(err instanceof ZodError) {
-                toast.error(err.issues[0].message)
-
+            if(isSeller) {
+                router.push('/sell')
                 return
             }
 
-            toast.error('Something went wrong. Please try again')
+            router.push('/')
         },
-        
-        onSuccess: ({sentToEmail}) => {
-            toast.success(`Verification email sent to ${sentToEmail}.`)
-            router.push('/verify-email?to=' + sentToEmail)
+
+        onError: (err) => {
+            if(err.data?.code === 'UNAUTHORIZED') {
+                toast.error('Invalid email or password.')
+            }
         }
     })
 
     const onSubmit = ({email, password}: TAuthCredentialsValidator) => {
-        mutate({email, password})
+        signIn({email, password})
     }
 
     return <>
@@ -67,7 +78,7 @@ const Page = () => {
                 <div className="flex flex-col items-center space-y-2 text-center">
                     <Icons.logo className='h-20 w-20' />
                     <h1 className="text-2xl font-bold">
-                        Sign in to your account
+                        Sign in to your {isSeller ? 'seller' : ''} account
                     </h1>
 
                     <Link className={buttonVariants({
@@ -75,7 +86,7 @@ const Page = () => {
                         className: 'gap-1.5'
                     })}
                     href='/sign-up'>
-                        Don&apos;t have an accoiunt?
+                        Don&apos;t have an account?
                         <ArrowRight className='h-4 w-4' />
                     </Link>
                 </div>
@@ -129,9 +140,23 @@ const Page = () => {
                                 or
                             </span>
                         </div>
-
                     </div>
-
+                    
+                    {isSeller ? (
+                        <Button
+                            onClick={continueAsBuyer}
+                            variant='secondary'
+                            disabled={isLoading}>
+                            Continue as customer
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={continueAsSeller}
+                            variant='secondary'
+                            disabled={isLoading}>
+                            Continue as seller
+                        </Button>
+                    )}
                 </div>
             </div>
         </div>
