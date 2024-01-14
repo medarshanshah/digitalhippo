@@ -35,7 +35,6 @@ export interface User {
   password: string | null;
 }
 export interface Product {
-  product_files: any;
   id: string;
   user?: (string | null) | User;
   name: string;
